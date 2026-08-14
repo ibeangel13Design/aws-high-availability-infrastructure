@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+# changing the Server hostname
+#=============================
+sudo hostnamectl set-hostname Jumper-Server-01
+
+# updating the server
+#====================
+sudo apt update -y
+
+#installing unzip
+#===============
+sudo apt install unzip -y
+
+# create a folder to mount to efs
+#================================
+mkdir -p /home/ubuntu/webserver
+
+#change permissions
+#=========================
+sudo chown ubuntu:ubuntu webserver
+
+# installing EFS client dependencies
+#====================================
+sudo apt -y install nfs-common stunnel4 git binutils
+
+# adding the efs access point to fstab
+#=====================================
+sudo tee -a /etc/fstab > /dev/null <<EOF
+fs-0c86372b47f895dc7.efs.us-east-2.amazonaws.com:/ /home/ubuntu/webserver nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0
+EOF
+
+# mount efs
+#===========
+sudo mount -a
+
+# connect to datadog
+#===================
+DD_API_KEY="<YOUR_DATADOG_API_KEY>"
